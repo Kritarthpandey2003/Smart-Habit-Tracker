@@ -61,10 +61,20 @@ def debug():
         "tmp_exists": os.path.exists('/tmp')
     }
 
-# Create tables in /tmp on Vercel startup
-with app.app_context():
-    import models
-    db.create_all()
+# Helper to ensure DB exists
+def init_db():
+    try:
+        with app.app_context():
+            import models
+            db.create_all()
+    except Exception as e:
+        print(f"Error creating DB: {e}")
+
+# Initialize DB on start (protected)
+if os.environ.get('VERCEL_REGION') or os.environ.get('VERCEL'):
+    # In Vercel, we can't rely on global execution being clean
+    # We will do it lazily or just try-catch it
+    init_db()
 
 if __name__ == '__main__':
     with app.app_context():
