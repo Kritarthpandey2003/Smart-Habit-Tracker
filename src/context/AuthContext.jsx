@@ -9,15 +9,13 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const storedUser = localStorage.getItem('username');
         if (token) {
-            // Decode token or fetch user profile if endpoint exists
-            // For now, just assume logged in if token exists
-            // In a real app, verify token with backend
-            setUser({ id: 'current-user' });
-            localStorage.setItem('token', token);
+            setUser({ username: storedUser || 'User' });
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         } else {
             setUser(null);
-            localStorage.removeItem('token');
+            delete api.defaults.headers.common['Authorization'];
         }
         setLoading(false);
     }, [token]);
@@ -25,7 +23,10 @@ export const AuthProvider = ({ children }) => {
     const login = async (username, password) => {
         try {
             const response = await api.post('/auth/login', { username, password });
+            localStorage.setItem('token', response.data.access_token);
+            localStorage.setItem('username', username);
             setToken(response.data.access_token);
+            setUser({ username });
             return { success: true };
         } catch (error) {
             return { success: false, error: error.response?.data?.message || 'Login failed' };
@@ -42,7 +43,10 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
         setToken(null);
+        setUser(null);
     };
 
     return (

@@ -89,7 +89,7 @@ const Dashboard = () => {
         <div className="p-6 max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-800">Hello, User</h1>
+                    <h1 className="text-3xl font-bold text-gray-800">Hello, {user?.username}</h1>
                     <p className="text-gray-500">Ready to build some habits?</p>
                 </div>
                 <button
