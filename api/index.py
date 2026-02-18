@@ -8,7 +8,7 @@ CORS(app)
 import os
 
 # Configuration
-if os.environ.get('VERCEL_REGION'):
+if os.environ.get('VERCEL_REGION') or os.environ.get('VERCEL'):
     # Vercel (read-only filesystem, use /tmp)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/habits.db'
 else:
@@ -30,6 +30,16 @@ app.register_blueprint(coach.bp)
 @app.route('/')
 def index():
     return {"message": "Smart Habit Tracker API is running!"}
+
+@app.route('/debug')
+def debug():
+    import os
+    return {
+        "db_uri": app.config['SQLALCHEMY_DATABASE_URI'],
+        "is_vercel": bool(os.environ.get('VERCEL')),
+        "cwd": os.getcwd(),
+        "tmp_exists": os.path.exists('/tmp')
+    }
 
 # Create tables in /tmp on Vercel startup
 with app.app_context():
