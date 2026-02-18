@@ -17,7 +17,11 @@ const Register = () => {
             await api.post('/auth/register', { username, password });
             navigate('/login');
         } catch (err) {
-            setError(err.response?.data?.message || 'Registration failed');
+            console.error(err);
+            const status = err.response?.status;
+            const dataMsg = err.response?.data?.message;
+            const fallback = err.message;
+            setError(`Failed (${status}): ${dataMsg || fallback}`);
         }
     };
 
