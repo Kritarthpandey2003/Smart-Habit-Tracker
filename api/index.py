@@ -5,8 +5,16 @@ from extensions import db, jwt
 app = Flask(__name__)
 CORS(app)
 
+import os
+
 # Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///habits.db'
+if os.environ.get('VERCEL_REGION'):
+    # Vercel (read-only filesystem, use /tmp)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/habits.db'
+else:
+    # Local
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///habits.db'
+    
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'super-secret-key'  # Change this in production!
 
@@ -22,6 +30,11 @@ app.register_blueprint(coach.bp)
 @app.route('/')
 def index():
     return {"message": "Smart Habit Tracker API is running!"}
+
+# Create tables in /tmp on Vercel startup
+with app.app_context():
+    import models
+    db.create_all()
 
 if __name__ == '__main__':
     with app.app_context():
