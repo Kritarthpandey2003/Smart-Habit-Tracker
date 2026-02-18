@@ -1,14 +1,5 @@
 {
-    "rewrites": [
-        {
-            "source": "/api/(.*)",
-            "destination": "/backend/app.py"
-        },
-        {
-            "source": "/(.*)",
-            "destination": "/frontend/index.html"
-        }
-    ],
+    "version": 2,
     "builds": [
         {
             "src": "backend/app.py",
@@ -20,6 +11,24 @@
             "config": {
                 "distDir": "dist"
             }
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/(.*)",
+            "dest": "/backend/app.py"
+        },
+        {
+            "src": "/assets/(.*)",
+            "dest": "/frontend/assets/$1"
+        },
+        {
+            "src": "/(.*)\\.(png|jpg|jpeg|svg|ico|json|css|js)",
+            "dest": "/frontend/$1.$2"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/frontend/index.html"
         }
     ]
 }
