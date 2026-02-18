@@ -57,15 +57,7 @@ app.register_blueprint(coach.bp)
 def index():
     return {"message": "Smart Habit Tracker API is running!"}
 
-@app.route('/debug')
-def debug():
-    import os
-    return {
-        "db_uri": app.config['SQLALCHEMY_DATABASE_URI'],
-        "is_vercel": bool(os.environ.get('VERCEL')),
-        "cwd": os.getcwd(),
-        "tmp_exists": os.path.exists('/tmp')
-    }
+
 
 # Helper to ensure DB exists
 def init_db():
