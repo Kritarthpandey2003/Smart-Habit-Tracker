@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 from extensions import db, jwt
 
@@ -9,9 +9,21 @@ from werkzeug.exceptions import HTTPException
 
 @app.errorhandler(Exception)
 def handle_exception(e):
+    # Pass through HTTP errors to allow custom handling if needed, 
+    # BUT convert them to JSON if they are generic standard errors like 500
     if isinstance(e, HTTPException):
-        return e
-    return {"message": f"Global Error: {str(e)}"}, 500
+        response = e.get_response()
+        # replace the body with JSON
+        response.data = jsonify({
+            "code": e.code,
+            "name": e.name,
+            "message": e.description,
+        }).data
+        response.content_type = "application/json"
+        return response
+    
+    # Non-HTTP exceptions (crashes)
+    return jsonify({"message": f"Global Error: {str(e)}"}), 500
 
 import os
 
