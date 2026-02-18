@@ -17,30 +17,29 @@ A full-stack habit tracking application with AI coaching.
 ## Setup Instructions
 
 ### Backend
-1. Navigate to `backend/`:
+1. Navigate to `api/`:
    ```bash
-   cd backend
+   cd api
    ```
 2. Create virtual environment and install dependencies:
    ```bash
    python -m venv venv
    .\venv\Scripts\activate
    pip install -r requirements.txt
-   # (Or manually: pip install flask sqlalchemy flask-sqlalchemy flask-cors openai flask-jwt-extended)
    ```
 3. Set up environment variables (Optional for AI):
    - Create `.env` file (or set in terminal): `OPENAI_API_KEY=your_key_here`
    - If no key is provided, the AI Coach operates in "Mock Mode".
 4. Run the server:
    ```bash
-   python app.py
+   python index.py
    ```
    Server runs at `http://localhost:5000`.
 
 ### Frontend
-1. Navigate to `frontend/`:
+1. Navigate to project root:
    ```bash
-   cd frontend
+   # (You are already in the root if you cloned the repo)
    ```
 2. Install dependencies:
    ```bash
