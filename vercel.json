@@ -1,34 +1,8 @@
 {
-    "version": 2,
-    "builds": [
+    "rewrites": [
         {
-            "src": "backend/app.py",
-            "use": "@vercel/python"
-        },
-        {
-            "src": "frontend/package.json",
-            "use": "@vercel/static-build",
-            "config": {
-                "distDir": "dist"
-            }
-        }
-    ],
-    "routes": [
-        {
-            "src": "/api/(.*)",
-            "dest": "/backend/app.py"
-        },
-        {
-            "src": "/assets/(.*)",
-            "dest": "/frontend/assets/$1"
-        },
-        {
-            "src": "/(.*)\\.(png|jpg|jpeg|svg|ico|json|css|js)",
-            "dest": "/frontend/$1.$2"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/frontend/index.html"
+            "source": "/api/(.*)",
+            "destination": "/api/index.py"
         }
     ]
 }
