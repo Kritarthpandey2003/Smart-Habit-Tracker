@@ -5,6 +5,14 @@ from extensions import db, jwt
 app = Flask(__name__)
 CORS(app)
 
+from werkzeug.exceptions import HTTPException
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    if isinstance(e, HTTPException):
+        return e
+    return {"message": f"Global Error: {str(e)}"}, 500
+
 import os
 
 # Configuration
