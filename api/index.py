@@ -53,11 +53,11 @@ db.init_app(app)
 jwt.init_app(app)
 
 # Import routes
-from routes import auth, habits
-# from routes import coach, debug
+from routes import auth, habits, coach
+# from routes import debug
 app.register_blueprint(auth.bp)
 app.register_blueprint(habits.bp)
-# app.register_blueprint(coach.bp)
+app.register_blueprint(coach.bp)
 # app.register_blueprint(debug.bp)
 
 @app.route('/')
