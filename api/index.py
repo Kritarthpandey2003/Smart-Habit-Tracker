@@ -77,6 +77,10 @@ def ping():
 def debug_routes():
     return jsonify({"routes": str(app.url_map)})
 
+@app.route('/<path:subpath>')
+def catch_all(subpath):
+    return jsonify({"message": "Catch All", "path": subpath, "url_map": str(app.url_map)})
+
 # Helper to ensure DB exists
 # def init_db():
 #     try:
