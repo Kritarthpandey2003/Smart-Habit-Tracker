@@ -50,11 +50,20 @@ app.config['JWT_SECRET_KEY'] = 'super-secret-key'  # Change this in production!
 jwt.init_app(app)
 
 # Import routes
-from routes import auth, habits, coach, debug
-app.register_blueprint(auth.bp)
-app.register_blueprint(habits.bp)
-app.register_blueprint(coach.bp)
-app.register_blueprint(debug.bp)
+# Import routes
+try:
+    from routes import auth, habits, coach, debug
+    app.register_blueprint(auth.bp)
+    app.register_blueprint(habits.bp)
+    app.register_blueprint(coach.bp)
+    app.register_blueprint(debug.bp)
+except Exception as e:
+    print(f"Import Error: {e}")
+    import traceback
+    traceback.print_exc()
+    @app.route('/import-error')
+    def import_error():
+        return jsonify({"message": "Import Error", "error": str(e), "trace": traceback.format_exc()}), 500
 
 @app.route('/')
 def index():
