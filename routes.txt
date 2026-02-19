@@ -1,5 +1,13 @@
-Map([<Rule '/static/<filename>' (HEAD, GET, OPTIONS) -> static>,
- <Rule '/' (HEAD, GET, OPTIONS) -> index>,
- <Rule '/api/ping' (HEAD, GET, OPTIONS) -> ping>,
- <Rule '/debug-routes' (HEAD, GET, OPTIONS) -> debug_routes>,
- <Rule '/<subpath>' (HEAD, GET, OPTIONS) -> catch_all>])
+Map([<Rule '/static/<filename>' (GET, OPTIONS, HEAD) -> static>,
+ <Rule '/api/auth/register' (OPTIONS, POST) -> auth.register>,
+ <Rule '/api/auth/login' (OPTIONS, POST) -> auth.login>,
+ <Rule '/api/habits' (GET, OPTIONS, HEAD) -> habits.get_habits>,
+ <Rule '/api/habits' (OPTIONS, POST) -> habits.create_habit>,
+ <Rule '/api/habits/<habit_id>' (OPTIONS, DELETE) -> habits.delete_habit>,
+ <Rule '/api/habits/<habit_id>/log' (OPTIONS, POST) -> habits.log_habit>,
+ <Rule '/api/coach/chat' (OPTIONS, POST) -> coach.chat>,
+ <Rule '/api/debug/health' (GET, OPTIONS, HEAD) -> debug.health_check>,
+ <Rule '/api/debug/db' (GET, OPTIONS, HEAD) -> debug.check_db>,
+ <Rule '/api/debug/sqlite' (GET, OPTIONS, HEAD) -> debug.check_sqlite>,
+ <Rule '/' (GET, OPTIONS, HEAD) -> index>,
+ <Rule '/api/ping' (GET, OPTIONS, HEAD) -> ping>])
