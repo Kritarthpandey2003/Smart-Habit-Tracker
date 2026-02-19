@@ -53,9 +53,10 @@ db.init_app(app)
 jwt.init_app(app)
 
 # Import routes
-# from routes import auth, habits, coach, debug
-# app.register_blueprint(auth.bp)
-# app.register_blueprint(habits.bp)
+from routes import auth, habits
+# from routes import coach, debug
+app.register_blueprint(auth.bp)
+app.register_blueprint(habits.bp)
 # app.register_blueprint(coach.bp)
 # app.register_blueprint(debug.bp)
 
@@ -63,7 +64,7 @@ jwt.init_app(app)
 def index():
     return {"message": "Smart Habit Tracker API is running!"}
 
-@app.route('/ping')
+@app.route('/api/ping')
 def ping():
     return {"message": "Pong", "env": str(os.environ.get('VERCEL_ENV'))}
 
