@@ -64,7 +64,7 @@ except Exception as e:
     
     @app.route('/api/import-error')
     def import_error():
-        return jsonify({"message": "Import Error", "error": error_msg, "trace": trace}), 500
+        return f"Import Error: {error_msg}\n\nTraceback:\n{trace}", 200
 
 @app.route('/')
 def index():
