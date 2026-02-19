@@ -1,6 +1,14 @@
 import sys
 import os
 
+# Patch sqlite3 with pysqlite3-binary if on Vercel
+if os.environ.get('VERCEL_REGION') or os.environ.get('VERCEL'):
+    try:
+        __import__('pysqlite3')
+        sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+    except ImportError:
+        pass
+
 # Add the current directory to sys.path to ensure local imports work on Vercel
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
