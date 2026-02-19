@@ -11,7 +11,9 @@ for i in range(20):
         if response.status_code == 200:
             data = response.json()
             if "routes" in data:
-                print("Routes found:", data["routes"])
+                print("Routes found!")
+                with open('routes.txt', 'w') as f:
+                    f.write(data["routes"])
                 break
             else:
                  print("Waiting for routes in response...")

@@ -61,7 +61,7 @@ except Exception as e:
     print(f"Import Error: {e}")
     import traceback
     traceback.print_exc()
-    @app.route('/import-error')
+    @app.route('/api/import-error')
     def import_error():
         return jsonify({"message": "Import Error", "error": str(e), "trace": traceback.format_exc()}), 500
 
