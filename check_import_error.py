@@ -1,7 +1,7 @@
 import requests
 import time
 
-url = "https://smart-habit-tracker-amber.vercel.app/import-error"
+url = "https://smart-habit-tracker-amber.vercel.app/api/import-error"
 ping_url = "https://smart-habit-tracker-amber.vercel.app/api/ping"
 
 print(f"Polling {url}...")

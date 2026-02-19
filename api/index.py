@@ -58,12 +58,13 @@ try:
     app.register_blueprint(coach.bp)
     app.register_blueprint(debug.bp)
 except Exception as e:
-    print(f"Import Error: {e}")
-    import traceback
-    traceback.print_exc()
+    error_msg = str(e)
+    trace = traceback.format_exc()
+    print(f"Import Error: {error_msg}")
+    
     @app.route('/api/import-error')
     def import_error():
-        return jsonify({"message": "Import Error", "error": str(e), "trace": traceback.format_exc()}), 500
+        return jsonify({"message": "Import Error", "error": error_msg, "trace": trace}), 500
 
 @app.route('/')
 def index():
