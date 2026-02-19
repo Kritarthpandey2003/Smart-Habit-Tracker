@@ -52,11 +52,12 @@ jwt.init_app(app)
 # Import routes
 # Import routes
 try:
-    from routes import auth, habits, coach, debug
-    app.register_blueprint(auth.bp)
-    app.register_blueprint(habits.bp)
-    app.register_blueprint(coach.bp)
-    app.register_blueprint(debug.bp)
+    # from routes import auth, habits, coach, debug
+    # app.register_blueprint(auth.bp)
+    # app.register_blueprint(habits.bp)
+    # app.register_blueprint(coach.bp)
+    # app.register_blueprint(debug.bp)
+    pass
 except Exception as e:
     error_msg = str(e)
     trace = traceback.format_exc()
