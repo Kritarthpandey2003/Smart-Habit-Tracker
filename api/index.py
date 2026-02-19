@@ -1,20 +1,13 @@
 import sys
 import os
 
-# Patch sqlite3 with pysqlite3-binary if on Vercel
-if os.environ.get('VERCEL_REGION') or os.environ.get('VERCEL'):
-    try:
-        __import__('pysqlite3')
-        sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-    except ImportError:
-        pass
-
 # Add the current directory to sys.path to ensure local imports work on Vercel
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from flask import Flask, jsonify
 from flask_cors import CORS
-from extensions import db, jwt
+from extensions import jwt
+# from extensions import db # No DB in Mock Mode
 
 app = Flask(__name__)
 CORS(app)
@@ -47,18 +40,13 @@ def handle_exception(e):
 import os
 
 # Configuration
-if os.environ.get('VERCEL_REGION') or os.environ.get('VERCEL'):
-    # Vercel (read-only filesystem, use /tmp)
-    # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/habits.db'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:' # Try memory to rule out FS issues
-else:
-    # Local
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///habits.db'
+# Mock Mode - No DB Config needed
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:' 
     
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'super-secret-key'  # Change this in production!
 
-db.init_app(app)
+# db.init_app(app) # Disable DB
 jwt.init_app(app)
 
 # Import routes
@@ -70,24 +58,22 @@ app.register_blueprint(debug.bp)
 
 @app.route('/')
 def index():
-    return {"message": "Smart Habit Tracker API is running!"}
+    return {"message": "Smart Habit Tracker API is running (Mock Mode)!"}
 
 @app.route('/api/ping')
 def ping():
-    return {"message": "Pong", "env": str(os.environ.get('VERCEL_ENV'))}
-
-
+    return {"message": "Pong", "env": str(os.environ.get('VERCEL_ENV')), "mode": "mock"}
 
 # Helper to ensure DB exists
-def init_db():
-    try:
-        with app.app_context():
-            import models
-            db.create_all()
-    except Exception as e:
-        print(f"Error creating DB: {e}")
-        # On Vercel, this might fail if /tmp is not writable or other issues,
-        # but usually it's fine. We want to know IF it failed.
+# def init_db():
+#     try:
+#         with app.app_context():
+#             import models
+#             db.create_all()
+#     except Exception as e:
+#         print(f"Error creating DB: {e}")
+#         # On Vercel, this might fail if /tmp is not writable or other issues,
+#         # but usually it's fine. We want to know IF it failed.
 
 # Initialize DB on start (protected)
 if os.environ.get('VERCEL_REGION') or os.environ.get('VERCEL'):
@@ -97,7 +83,7 @@ if os.environ.get('VERCEL_REGION') or os.environ.get('VERCEL'):
     pass
 
 if __name__ == '__main__':
-    with app.app_context():
-        import models  # Import models to ensure they are registered with SQLAlchemy
-        db.create_all()
+    # with app.app_context():
+    #     import models  # Import models to ensure they are registered with SQLAlchemy
+    #     db.create_all()
     app.run(debug=True, port=5000)

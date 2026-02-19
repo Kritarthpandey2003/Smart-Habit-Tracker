@@ -1,7 +1,5 @@
 from flask import Blueprint, request, jsonify
-from extensions import db
-from models import Habit, HabitLog, User
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from mock_store import store
 import os
 from openai import OpenAI
 
@@ -15,17 +13,17 @@ client = OpenAI(api_key=api_key) if api_key else None
 @jwt_required()
 def chat():
     current_user_id = int(get_jwt_identity())
-    user = User.query.get(current_user_id)
+    user = store.get_user_by_id(current_user_id)
     data = request.get_json()
     user_message = data.get('message', '')
     
     # Gather context
-    habits = Habit.query.filter_by(user_id=current_user_id).all()
-    context = f"User: {user.username}.\nHabits:\n"
+    habits = store.get_habits_by_user(current_user_id)
+    context = f"User: {user['username']}.\nHabits:\n"
     for h in habits:
-        context += f"- {h.name} ({h.frequency}): {h.description}\n"
+        context += f"- {h['name']} ({h['frequency']}): {h['description']}\n"
         # Add recent logs if needed
-        completed_count = HabitLog.query.filter_by(habit_id=h.id, status=True).count()
+        completed_count = store.get_completed_count(h['id'])
         context += f"  - Completed {completed_count} times total.\n"
 
     system_prompt = (
