@@ -42,7 +42,8 @@ const Dashboard = () => {
             setShowForm(false);
             fetchHabits();
         } catch (err) {
-            alert('Failed to create habit');
+            const msg = err.response?.data?.message || err.message || 'Failed to create habit';
+            alert(`Failed to create habit: ${msg}`);
         }
     };
 
@@ -108,8 +109,8 @@ const Dashboard = () => {
                     <button
                         onClick={() => setShowForm(!showForm)}
                         className={`flex items-center gap-2 px-5 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:-translate-y-0.5 ${showForm
-                                ? 'bg-gray-100 text-gray-600 shadow-gray-200 hover:bg-gray-200'
-                                : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-purple-500/30 hover:shadow-purple-500/50'
+                            ? 'bg-gray-100 text-gray-600 shadow-gray-200 hover:bg-gray-200'
+                            : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-purple-500/30 hover:shadow-purple-500/50'
                             }`}
                     >
                         {showForm ? <><FaTimes /> Cancel</> : <><FaPlus /> New Habit</>}

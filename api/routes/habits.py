@@ -23,24 +23,32 @@ def get_habits():
 @bp.route('', methods=['POST'])
 @jwt_required()
 def create_habit():
-    current_user_id = int(get_jwt_identity())
-    data = request.get_json()
-    
-    name = data.get('name')
-    if not name:
-        return jsonify({"message": "Name is required"}), 400
+    try:
+        current_user_id = get_jwt_identity()
+        try:
+            current_user_id = int(current_user_id)
+        except (ValueError, TypeError):
+            pass
+        data = request.get_json()
         
-    new_habit = {
-        "user_id": current_user_id,
-        "name": name,
-        "description": data.get('description', ''),
-        "frequency": data.get('frequency', 'daily')
-    }
-    
-    created_habit = store.add_habit(new_habit)
-    created_habit['logs'] = [] # Init empty logs
-    
-    return jsonify(created_habit), 201
+        name = data.get('name')
+        if not name:
+            return jsonify({"message": "Name is required"}), 400
+            
+        new_habit = {
+            "user_id": current_user_id,
+            "name": name,
+            "description": data.get('description', ''),
+            "frequency": data.get('frequency', 'daily')
+        }
+        
+        created_habit = store.add_habit(new_habit)
+        created_habit['logs'] = []
+        
+        return jsonify(created_habit), 201
+    except Exception as e:
+        print(f"Create Habit Error: {str(e)}")
+        return jsonify({"message": str(e)}), 500
 
 @bp.route('/<int:habit_id>', methods=['DELETE'])
 @jwt_required()
