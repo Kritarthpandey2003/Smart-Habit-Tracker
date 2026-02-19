@@ -42,3 +42,16 @@ def check_db():
             "status": "error",
             "error": str(e)
         }), 500
+
+@bp.route('/sqlite', methods=['GET'])
+def check_sqlite():
+    import sqlite3
+    try:
+        conn = sqlite3.connect(':memory:')
+        cursor = conn.cursor()
+        cursor.execute('SELECT 1')
+        result = cursor.fetchone()
+        conn.close()
+        return jsonify({"status": "ok", "result": result[0], "version": sqlite3.sqlite_version})
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)}), 500
