@@ -1,6 +1,5 @@
-Map([<Rule '/static/<filename>' (OPTIONS, GET, HEAD) -> static>,
- <Rule '/import-error' (OPTIONS, GET, HEAD) -> import_error>,
- <Rule '/' (OPTIONS, GET, HEAD) -> index>,
- <Rule '/api/ping' (OPTIONS, GET, HEAD) -> ping>,
- <Rule '/debug-routes' (OPTIONS, GET, HEAD) -> debug_routes>,
- <Rule '/<subpath>' (OPTIONS, GET, HEAD) -> catch_all>])
+Map([<Rule '/static/<filename>' (HEAD, GET, OPTIONS) -> static>,
+ <Rule '/' (HEAD, GET, OPTIONS) -> index>,
+ <Rule '/api/ping' (HEAD, GET, OPTIONS) -> ping>,
+ <Rule '/debug-routes' (HEAD, GET, OPTIONS) -> debug_routes>,
+ <Rule '/<subpath>' (HEAD, GET, OPTIONS) -> catch_all>])
