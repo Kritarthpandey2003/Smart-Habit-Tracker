@@ -17,11 +17,31 @@ const Register = () => {
             await api.post('/auth/register', { username, password });
             navigate('/login');
         } catch (err) {
-            console.error(err);
+            console.error("Registration Error Details:", err);
             const status = err.response?.status;
-            const dataMsg = err.response?.data?.message;
-            const fallback = err.message;
-            setError(`Failed (${status}): ${dataMsg || fallback}`);
+            let dataMsg = err.response?.data?.message;
+
+            if (err.response?.data?.error) {
+                // Backend returned a specific error structure (from our new handler)
+                dataMsg = `Error: ${err.response.data.message} - ${err.response.data.error}`;
+            } else if (!dataMsg && err.response?.data) {
+                if (typeof err.response.data === 'string') {
+                    if (err.response.data.includes('<!DOCTYPE html>')) {
+                        dataMsg = "Server returned an HTML error page. See console.";
+                    } else {
+                        dataMsg = err.response.data.slice(0, 150); // Show a snippet of the error
+                    }
+                } else {
+                    try {
+                        dataMsg = JSON.stringify(err.response.data);
+                    } catch (e) {
+                        dataMsg = "Unknown data format";
+                    }
+                }
+            }
+
+            const fallback = err.message || "Unknown error";
+            setError(`Failed (${status || '?'}): ${dataMsg || fallback}`);
         }
     };
 

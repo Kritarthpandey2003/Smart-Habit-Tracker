@@ -29,7 +29,12 @@ def handle_exception(e):
         return response
     
     # Non-HTTP exceptions (crashes)
-    return jsonify({"message": f"Global Error: {str(e)}"}), 500
+    print(f"Global Error: {str(e)}") # Log to Vercel console
+    return jsonify({
+        "code": 500,
+        "name": type(e).__name__,
+        "message": str(e)
+    }), 500
 
 import os
 
@@ -48,10 +53,11 @@ db.init_app(app)
 jwt.init_app(app)
 
 # Import routes
-from routes import auth, habits, coach
+from routes import auth, habits, coach, debug
 app.register_blueprint(auth.bp)
 app.register_blueprint(habits.bp)
 app.register_blueprint(coach.bp)
+app.register_blueprint(debug.bp)
 
 @app.route('/')
 def index():
@@ -67,6 +73,8 @@ def init_db():
             db.create_all()
     except Exception as e:
         print(f"Error creating DB: {e}")
+        # On Vercel, this might fail if /tmp is not writable or other issues,
+        # but usually it's fine. We want to know IF it failed.
 
 # Initialize DB on start (protected)
 if os.environ.get('VERCEL_REGION') or os.environ.get('VERCEL'):
