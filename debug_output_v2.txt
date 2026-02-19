@@ -1,0 +1,27 @@
+--- Testing GET https://smart-habit-tracker-amber.vercel.app/api/debug/health ---
+Status: 500
+Body: A server error has occurred
+
+FUNCTION_INVOCATION_FAILED
+
+bom1::mzhtd-1771490126953-5a9985051001
+
+
+--- Testing GET https://smart-habit-tracker-amber.vercel.app/api/debug/db ---
+Status: 500
+Body: A server error has occurred
+
+FUNCTION_INVOCATION_FAILED
+
+bom1::nrmvd-1771490131302-d9c3d274c3a3
+
+
+--- Testing POST https://smart-habit-tracker-amber.vercel.app/api/auth/register ---
+Status: 500
+Body: A server error has occurred
+
+FUNCTION_INVOCATION_FAILED
+
+bom1::rg54n-1771490135604-b37db79431b5
+
+

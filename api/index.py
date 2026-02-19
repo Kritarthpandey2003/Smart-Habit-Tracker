@@ -63,6 +63,10 @@ app.register_blueprint(debug.bp)
 def index():
     return {"message": "Smart Habit Tracker API is running!"}
 
+@app.route('/ping')
+def ping():
+    return {"message": "Pong", "env": str(os.environ.get('VERCEL_ENV'))}
+
 
 
 # Helper to ensure DB exists
@@ -80,7 +84,8 @@ def init_db():
 if os.environ.get('VERCEL_REGION') or os.environ.get('VERCEL'):
     # In Vercel, we can't rely on global execution being clean
     # We will do it lazily or just try-catch it
-    init_db()
+    # init_db()  <-- Commented out to debug startup crash
+    pass
 
 if __name__ == '__main__':
     with app.app_context():
