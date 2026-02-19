@@ -41,7 +41,8 @@ import os
 # Configuration
 if os.environ.get('VERCEL_REGION') or os.environ.get('VERCEL'):
     # Vercel (read-only filesystem, use /tmp)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/habits.db'
+    # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/habits.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:' # Try memory to rule out FS issues
 else:
     # Local
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///habits.db'
