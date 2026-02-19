@@ -50,15 +50,13 @@ app.config['JWT_SECRET_KEY'] = 'super-secret-key'  # Change this in production!
 jwt.init_app(app)
 
 # Import routes
-# Import routes
+import traceback
 try:
-    # from routes import auth, habits, coach, debug
-    from routes import coach, debug
-    # app.register_blueprint(auth.bp)
-    # app.register_blueprint(habits.bp)
-    # app.register_blueprint(coach.bp)
+    from routes import auth, habits, coach, debug
+    app.register_blueprint(auth.bp)
+    app.register_blueprint(habits.bp)
+    app.register_blueprint(coach.bp)
     app.register_blueprint(debug.bp)
-    pass
 except Exception as e:
     error_msg = str(e)
     trace = traceback.format_exc()
@@ -80,14 +78,6 @@ def ping():
         "mode": "mock",
         "routes": str(app.url_map)
     })
-
-@app.route('/debug-routes')
-def debug_routes():
-    return jsonify({"routes": str(app.url_map)})
-
-@app.route('/<path:subpath>')
-def catch_all(subpath):
-    return jsonify({"message": "Catch All", "path": subpath, "url_map": str(app.url_map)})
 
 # Helper to ensure DB exists
 # def init_db():

@@ -2,13 +2,8 @@ from flask import Blueprint, request, jsonify
 from mock_store import store
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import os
-from openai import OpenAI
 
 bp = Blueprint('coach', __name__, url_prefix='/api/coach')
-
-# Initialize OpenAI client if key is present
-api_key = os.getenv('OPENAI_API_KEY')
-client = OpenAI(api_key=api_key) if api_key else None
 
 @bp.route('/chat', methods=['POST'])
 @jwt_required()
@@ -23,7 +18,6 @@ def chat():
     context = f"User: {user['username']}.\nHabits:\n"
     for h in habits:
         context += f"- {h['name']} ({h['frequency']}): {h['description']}\n"
-        # Add recent logs if needed
         completed_count = store.get_completed_count(h['id'])
         context += f"  - Completed {completed_count} times total.\n"
 
@@ -33,8 +27,11 @@ def chat():
         "Keep responses concise and motivating."
     )
 
-    if client:
+    api_key = os.getenv('OPENAI_API_KEY')
+    if api_key:
         try:
+            from openai import OpenAI
+            client = OpenAI(api_key=api_key)
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
@@ -55,3 +52,4 @@ def chat():
         )
 
     return jsonify({"reply": reply})
+
