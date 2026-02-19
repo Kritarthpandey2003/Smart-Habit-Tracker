@@ -38,13 +38,14 @@ def handle_exception(e):
     }), 500
 
 import os
+from datetime import timedelta
 
 # Configuration
 # Mock Mode - No DB Config needed
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:' 
     
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'super-secret-key'  # Change this in production!
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'super-secret-key-change-in-production')
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=7)
 
 # db.init_app(app) # Disable DB
 jwt.init_app(app)
