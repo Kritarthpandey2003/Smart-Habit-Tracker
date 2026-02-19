@@ -73,6 +73,10 @@ def index():
 def ping():
     return {"message": "Pong", "env": str(os.environ.get('VERCEL_ENV')), "mode": "mock"}
 
+@app.route('/debug-routes')
+def debug_routes():
+    return jsonify({"routes": str(app.url_map)})
+
 # Helper to ensure DB exists
 # def init_db():
 #     try:
