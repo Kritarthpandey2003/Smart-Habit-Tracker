@@ -70,8 +70,12 @@ def index():
     return {"message": "Smart Habit Tracker API is running (Mock Mode)!"}
 
 @app.route('/api/ping')
-def ping():
-    return {"message": "Pong", "env": str(os.environ.get('VERCEL_ENV')), "mode": "mock"}
+    return jsonify({
+        "message": "Pong", 
+        "env": str(os.environ.get('VERCEL_ENV')), 
+        "mode": "mock",
+        "routes": str(app.url_map)
+    })
 
 @app.route('/debug-routes')
 def debug_routes():
