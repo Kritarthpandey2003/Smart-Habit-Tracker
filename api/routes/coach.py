@@ -38,7 +38,7 @@ def chat():
         try:
             import google.generativeai as genai
             genai.configure(api_key=gemini_api_key)
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            model = genai.GenerativeModel('gemini-pro')
             prompt = f"System Instruction: {system_prompt}\n\nContext:\n{context}\n\nUser Message: {user_message}"
             response = model.generate_content(prompt)
             reply = response.text
