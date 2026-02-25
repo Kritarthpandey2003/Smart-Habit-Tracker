@@ -30,25 +30,11 @@ def chat():
         "Keep responses concise and motivating."
     )
 
-    openai_api_key = os.getenv('OPENAI_API_KEY')
     gemini_api_key = os.getenv('GEMINI_API_KEY')
 
-    if openai_api_key:
-        try:
-            from openai import OpenAI
-            client = OpenAI(api_key=openai_api_key)
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": f"Context:\n{context}\n\nUser Message: {user_message}"}
-                ]
-            )
-            reply = response.choices[0].message.content
-        except Exception as e:
-            print(f"OpenAI Error: {e}")
-            reply = f"[DEBUG] OpenAI API failed. Error: {str(e)}"
-    elif gemini_api_key:
+    # Removed OpenAI logic due to 'Client.__init__() got unexpected keyword argument proxies'
+    # in Vercel serverless environment with openai v1.30.1.
+    if gemini_api_key:
         try:
             import google.generativeai as genai
             genai.configure(api_key=gemini_api_key)
