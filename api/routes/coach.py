@@ -37,13 +37,16 @@ def chat():
     if gemini_api_key:
         try:
             import requests
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_api_key}"
+            url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
             payload = {
                 "contents": [{
                     "parts": [{"text": f"System Instruction: {system_prompt}\n\nContext:\n{context}\n\nUser Message: {user_message}"}]
                 }]
             }
-            headers = {'Content-Type': 'application/json'}
+            headers = {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': gemini_api_key
+            }
             res = requests.post(url, json=payload, headers=headers)
             res.raise_for_status()
             data = res.json()
