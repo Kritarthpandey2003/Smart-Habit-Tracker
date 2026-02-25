@@ -38,7 +38,7 @@ def chat():
         try:
             gemini_api_key = gemini_api_key.strip()
             import requests
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_api_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={gemini_api_key}"
             payload = {
                 "contents": [{
                     "parts": [{"text": f"System Instruction: {system_prompt}\n\nContext:\n{context}\n\nUser Message: {user_message}"}]
