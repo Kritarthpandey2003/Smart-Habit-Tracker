@@ -27,11 +27,13 @@ def chat():
         "Keep responses concise and motivating."
     )
 
-    api_key = os.getenv('OPENAI_API_KEY')
-    if api_key:
+    openai_api_key = os.getenv('OPENAI_API_KEY')
+    gemini_api_key = os.getenv('GEMINI_API_KEY')
+
+    if openai_api_key:
         try:
             from openai import OpenAI
-            client = OpenAI(api_key=api_key)
+            client = OpenAI(api_key=openai_api_key)
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
@@ -43,11 +45,22 @@ def chat():
         except Exception as e:
             print(f"OpenAI Error: {e}")
             reply = "I'm having trouble connecting to my brain right now, but keep going! You're doing great."
+    elif gemini_api_key:
+        try:
+            import google.generativeai as genai
+            genai.configure(api_key=gemini_api_key)
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            prompt = f"System Instruction: {system_prompt}\n\nContext:\n{context}\n\nUser Message: {user_message}"
+            response = model.generate_content(prompt)
+            reply = response.text
+        except Exception as e:
+            print(f"Gemini Error: {e}")
+            reply = "I'm having trouble connecting to my brain right now, but keep going! You're doing great."
     else:
         # Mock response
         reply = (
             "I see you're working on your habits! "
-            "(Note: OpenAI API Key not configured, this is a mock response). "
+            "(Note: No AI API Key configured, this is a mock response). "
             f"You have {len(habits)} active habits. Keep it up!"
         )
 
