@@ -36,24 +36,28 @@ def chat():
     # in Vercel serverless environment with openai v1.30.1.
     if gemini_api_key:
         try:
+            gemini_api_key = gemini_api_key.strip()
             import requests
-            url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_api_key}"
             payload = {
                 "contents": [{
                     "parts": [{"text": f"System Instruction: {system_prompt}\n\nContext:\n{context}\n\nUser Message: {user_message}"}]
                 }]
             }
-            headers = {
-                'Content-Type': 'application/json',
-                'x-goog-api-key': gemini_api_key
-            }
+            headers = {'Content-Type': 'application/json'}
             res = requests.post(url, json=payload, headers=headers)
             res.raise_for_status()
             data = res.json()
             reply = data['candidates'][0]['content']['parts'][0]['text']
         except Exception as e:
-            print(f"Gemini API Exception: {e}")
-            reply = f"[DEBUG] Gemini REST API failed. Error: {str(e)}"
+            # Fallback to list available models for debug
+            try:
+                list_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={gemini_api_key}"
+                list_res = requests.get(list_url)
+                models = [m['name'] for m in list_res.json().get('models', []) if 'generateContent' in m.get('supportedGenerationMethods', [])]
+                reply = f"[DEBUG] 404 Error. Available models for this API key: {', '.join(models)}. Error detail: {str(e)}"
+            except Exception as listing_err:
+                reply = f"[DEBUG] Gemini REST API completely failed. Initial error: {str(e)}. Listing models error: {str(listing_err)}"
     else:
         # Mock response
         reply = (
