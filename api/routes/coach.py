@@ -36,15 +36,21 @@ def chat():
     # in Vercel serverless environment with openai v1.30.1.
     if gemini_api_key:
         try:
-            import google.generativeai as genai
-            genai.configure(api_key=gemini_api_key)
-            model = genai.GenerativeModel('gemini-pro')
-            prompt = f"System Instruction: {system_prompt}\n\nContext:\n{context}\n\nUser Message: {user_message}"
-            response = model.generate_content(prompt)
-            reply = response.text
+            import requests
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_api_key}"
+            payload = {
+                "contents": [{
+                    "parts": [{"text": f"System Instruction: {system_prompt}\n\nContext:\n{context}\n\nUser Message: {user_message}"}]
+                }]
+            }
+            headers = {'Content-Type': 'application/json'}
+            res = requests.post(url, json=payload, headers=headers)
+            res.raise_for_status()
+            data = res.json()
+            reply = data['candidates'][0]['content']['parts'][0]['text']
         except Exception as e:
-            print(f"Gemini Error: {e}")
-            reply = f"[DEBUG] Gemini API failed. Error: {str(e)}"
+            print(f"Gemini API Exception: {e}")
+            reply = f"[DEBUG] Gemini REST API failed. Error: {str(e)}"
     else:
         # Mock response
         reply = (
