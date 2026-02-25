@@ -47,7 +47,7 @@ def chat():
             reply = response.choices[0].message.content
         except Exception as e:
             print(f"OpenAI Error: {e}")
-            reply = "I'm having trouble connecting to my brain right now, but keep going! You're doing great."
+            reply = f"[DEBUG] OpenAI API failed. Error: {str(e)}"
     elif gemini_api_key:
         try:
             import google.generativeai as genai
@@ -58,7 +58,7 @@ def chat():
             reply = response.text
         except Exception as e:
             print(f"Gemini Error: {e}")
-            reply = "I'm having trouble connecting to my brain right now, but keep going! You're doing great."
+            reply = f"[DEBUG] Gemini API failed. Error: {str(e)}"
     else:
         # Mock response
         reply = (
