@@ -13,9 +13,12 @@ def chat():
     data = request.get_json()
     user_message = data.get('message', '')
     
+    # Handle missing user in Mock Mode due to Vercel Serverless cold starts
+    username = user['username'] if user else f"User {current_user_id}"
+    
     # Gather context
     habits = store.get_habits_by_user(current_user_id)
-    context = f"User: {user['username']}.\nHabits:\n"
+    context = f"User: {username}.\nHabits:\n"
     for h in habits:
         context += f"- {h['name']} ({h['frequency']}): {h['description']}\n"
         completed_count = store.get_completed_count(h['id'])
