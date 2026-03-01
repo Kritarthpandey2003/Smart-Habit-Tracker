@@ -21,6 +21,7 @@ class Habit(db.Model):
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(200))
     frequency = db.Column(db.String(20), default='daily')  # daily, weekly
+    reminder_time = db.Column(db.String(5))
     logs = db.relationship('HabitLog', backref='habit', lazy=True, cascade="all, delete-orphan")
 
     def to_dict(self):
@@ -28,7 +29,8 @@ class Habit(db.Model):
             'id': self.id,
             'name': self.name,
             'description': self.description,
-            'frequency': self.frequency
+            'frequency': self.frequency,
+            'reminder_time': self.reminder_time
         }
 
 class HabitLog(db.Model):

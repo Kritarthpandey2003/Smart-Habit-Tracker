@@ -13,6 +13,9 @@ const Dashboard = () => {
 
     const [newHabitName, setNewHabitName] = useState('');
     const [newHabitDesc, setNewHabitDesc] = useState('');
+    const [newHabitReminder, setNewHabitReminder] = useState('');
+    const [triggeredAlarms, setTriggeredAlarms] = useState(new Set());
+    const [toast, setToast] = useState(null);
 
     const fetchHabits = async () => {
         try {
@@ -35,10 +38,12 @@ const Dashboard = () => {
             await api.post('/habits', {
                 name: newHabitName,
                 description: newHabitDesc,
-                frequency: 'daily'
+                frequency: 'daily',
+                reminderTime: newHabitReminder
             });
             setNewHabitName('');
             setNewHabitDesc('');
+            setNewHabitReminder('');
             setShowForm(false);
             fetchHabits();
         } catch (err) {
@@ -69,6 +74,72 @@ const Dashboard = () => {
             console.error("Failed to log habit", err);
             fetchHabits();
         }
+    };
+
+    // Background checker for alarms
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (habits.length === 0) return;
+            const now = new Date();
+            const currentTime = format(now, 'HH:mm');
+            const dateStr = format(now, 'yyyy-MM-dd');
+
+            habits.forEach(habit => {
+                if (!habit.reminder_time) return;
+
+                // check if it's completed today
+                const isCompletedToday = habit.logs && habit.logs.some(l => l.date === dateStr && l.status);
+                if (isCompletedToday) return;
+
+                if (habit.reminder_time === currentTime) {
+                    const alarmKey = `${habit.id}-${dateStr}-${currentTime}`;
+                    setTriggeredAlarms(prev => {
+                        if (prev.has(alarmKey)) return prev;
+                        // Trigger alarm
+                        const newSet = new Set(prev).add(alarmKey);
+                        triggerAlarm(habit.name);
+                        return newSet;
+                    });
+                }
+            });
+        }, 10000); // Check every 10 seconds
+
+        return () => clearInterval(interval);
+    }, [habits]);
+
+    const triggerAlarm = (habitName) => {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+
+            oscillator.start();
+            setTimeout(() => oscillator.stop(), 500);
+
+            setTimeout(() => {
+                const osc2 = audioCtx.createOscillator();
+                const gain2 = audioCtx.createGain();
+                osc2.connect(gain2);
+                gain2.connect(audioCtx.destination);
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(880, audioCtx.currentTime);
+                gain2.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc2.start();
+                setTimeout(() => osc2.stop(), 500);
+            }, 600);
+        } catch (e) {
+            console.error("Audio block from browser", e);
+        }
+
+        setToast(`⏰ Time for your habit: ${habitName}!`);
+        setTimeout(() => setToast(null), 8000);
     };
 
     const handleDeleteHabit = async (id) => {
@@ -162,6 +233,15 @@ const Dashboard = () => {
                                 placeholder="Brief description of your habit"
                             />
                         </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600 mb-1">Reminder Time (Optional)</label>
+                            <input
+                                type="time"
+                                value={newHabitReminder}
+                                onChange={e => setNewHabitReminder(e.target.value)}
+                                className="block w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 bg-white/80 transition-all"
+                            />
+                        </div>
                         <button
                             type="submit"
                             className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl hover:from-indigo-700 hover:to-purple-700 font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all hover:-translate-y-0.5"
@@ -193,6 +273,25 @@ const Dashboard = () => {
                     ))
                 )}
             </div>
+
+            {/* Toast Notification */}
+            {toast && (
+                <div className="fixed bottom-6 right-6 bg-white shadow-2xl border border-purple-100 rounded-2xl p-4 flex items-center gap-4 animate-bounce z-50 transition-all transform hover:scale-105">
+                    <div className="bg-gradient-to-br from-purple-100 to-pink-100 text-purple-600 w-12 h-12 rounded-full flex items-center justify-center text-2xl">
+                        🔔
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-gray-800">Reminder!</h4>
+                        <p className="text-gray-600 font-medium">{toast}</p>
+                    </div>
+                    <button
+                        onClick={() => setToast(null)}
+                        className="ml-4 text-gray-400 hover:text-gray-600"
+                    >
+                        <FaTimes />
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

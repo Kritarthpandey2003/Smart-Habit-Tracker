@@ -39,7 +39,8 @@ def create_habit():
             "user_id": current_user_id,
             "name": name,
             "description": data.get('description', ''),
-            "frequency": data.get('frequency', 'daily')
+            "frequency": data.get('frequency', 'daily'),
+            "reminder_time": data.get('reminderTime', '')
         }
         
         created_habit = store.add_habit(new_habit)

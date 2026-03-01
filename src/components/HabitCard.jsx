@@ -46,6 +46,11 @@ const HabitCard = ({ habit, onToggle, onDelete }) => {
                             <span className={clsx("text-xs font-semibold px-2.5 py-1 rounded-full", colors.badge)}>
                                 {habit.frequency}
                             </span>
+                            {habit.reminder_time && (
+                                <span className={clsx("text-xs font-semibold px-2.5 py-1 rounded-full border bg-white shadow-sm flex items-center gap-1", isCompletedToday ? "text-gray-400 border-gray-100" : "text-gray-600 border-gray-200")}>
+                                    ⏰ {habit.reminder_time}
+                                </span>
+                            )}
                             {streak > 0 && (
                                 <span className="text-xs font-medium text-amber-600 flex items-center gap-1 bg-amber-50 px-2.5 py-1 rounded-full">
                                     <FaFire className="text-orange-500" /> {streak} day streak
