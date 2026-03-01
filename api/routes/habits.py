@@ -40,6 +40,7 @@ def create_habit():
             "name": name,
             "description": data.get('description', ''),
             "frequency": data.get('frequency', 'daily'),
+            "recurrence_days": data.get('recurrenceDays', ''),
             "reminder_time": data.get('reminderTime', '')
         }
         

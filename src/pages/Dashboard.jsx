@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from '../api';
 import HabitCard from '../components/HabitCard';
+import CompletionChart from '../components/CompletionChart';
+import BadgeCard from '../components/BadgeCard';
 import { format } from 'date-fns';
 import { AuthContext } from '../context/AuthContext';
-import { FaPlus, FaTimes, FaStar } from 'react-icons/fa';
+import { FaPlus, FaTimes, FaStar, FaTrophy } from 'react-icons/fa';
 
 const Dashboard = () => {
     const [habits, setHabits] = useState([]);
@@ -14,6 +16,8 @@ const Dashboard = () => {
     const [newHabitName, setNewHabitName] = useState('');
     const [newHabitDesc, setNewHabitDesc] = useState('');
     const [newHabitReminder, setNewHabitReminder] = useState('');
+    const [newHabitFrequency, setNewHabitFrequency] = useState('daily');
+    const [newHabitDays, setNewHabitDays] = useState([]);
     const [triggeredAlarms, setTriggeredAlarms] = useState(new Set());
     const [toast, setToast] = useState(null);
 
@@ -38,12 +42,15 @@ const Dashboard = () => {
             await api.post('/habits', {
                 name: newHabitName,
                 description: newHabitDesc,
-                frequency: 'daily',
+                frequency: newHabitFrequency,
+                recurrenceDays: newHabitFrequency === 'custom' ? newHabitDays.join(',') : '',
                 reminderTime: newHabitReminder
             });
             setNewHabitName('');
             setNewHabitDesc('');
             setNewHabitReminder('');
+            setNewHabitFrequency('daily');
+            setNewHabitDays([]);
             setShowForm(false);
             fetchHabits();
         } catch (err) {
@@ -161,10 +168,56 @@ const Dashboard = () => {
         </div>
     );
 
-    const completedToday = habits.filter(h => {
+    // Filter habits for today
+    const currentDayOfWeek = String(new Date().getDay());
+    const activeHabitsForToday = habits.filter(h => {
+        if (h.frequency === 'daily') return true;
+        if (h.frequency === 'custom' && h.recurrence_days) {
+            return h.recurrence_days.split(',').includes(currentDayOfWeek);
+        }
+        return true; // default fallback
+    });
+
+    const completedToday = activeHabitsForToday.filter(h => {
         const today = format(new Date(), 'yyyy-MM-dd');
         return h.logs.some(l => l.date === today && l.status);
     }).length;
+
+    // Badges calculation
+    const calculateBadges = () => {
+        const badges = [];
+        let totalCompletions = 0;
+        let maxStreakAnyHabit = 0;
+
+        const calculateStreak = (logs) => {
+            if (!logs || logs.length === 0) return 0;
+            const sortedLogs = [...logs].filter(l => l.status).sort((a, b) => new Date(b.date) - new Date(a.date));
+            if (sortedLogs.length === 0) return 0;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const lastLogDate = new Date(sortedLogs[0].date);
+            lastLogDate.setHours(0, 0, 0, 0);
+            const diffTime = Math.abs(today - lastLogDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDays > 1) return 0;
+            return sortedLogs.length;
+        };
+
+        habits.forEach(h => {
+            const streak = calculateStreak(h.logs);
+            if (streak > maxStreakAnyHabit) maxStreakAnyHabit = streak;
+            totalCompletions += (h.logs || []).filter(l => l.status).length;
+        });
+
+        if (totalCompletions >= 1) badges.push({ title: 'First Step', desc: 'Completed your first task', icon: 'star' });
+        if (totalCompletions >= 10) badges.push({ title: 'Getting Serious', desc: '10 total completions', icon: 'medal' });
+        if (maxStreakAnyHabit >= 3) badges.push({ title: 'On Fire', desc: '3-day streak on a habit', icon: 'fire' });
+        if (maxStreakAnyHabit >= 7) badges.push({ title: 'Consistency King', desc: '7-day streak', icon: 'crown' });
+
+        return badges;
+    };
+
+    const myBadges = calculateBadges();
 
     return (
         <div className="p-8 pt-16 max-w-4xl mx-auto">
@@ -191,8 +244,8 @@ const Dashboard = () => {
                 {/* Stats Row */}
                 <div className="grid grid-cols-3 gap-4 mt-6">
                     <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-4 text-white shadow-lg shadow-indigo-500/20">
-                        <p className="text-indigo-200 text-xs font-medium uppercase tracking-wider">Total Habits</p>
-                        <p className="text-3xl font-bold mt-1">{habits.length}</p>
+                        <p className="text-indigo-200 text-xs font-medium uppercase tracking-wider">Today's Habits</p>
+                        <p className="text-3xl font-bold mt-1">{activeHabitsForToday.length}</p>
                     </div>
                     <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-4 text-white shadow-lg shadow-emerald-500/20">
                         <p className="text-emerald-200 text-xs font-medium uppercase tracking-wider">Done Today</p>
@@ -200,10 +253,27 @@ const Dashboard = () => {
                     </div>
                     <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-4 text-white shadow-lg shadow-amber-500/20">
                         <p className="text-amber-200 text-xs font-medium uppercase tracking-wider">Completion</p>
-                        <p className="text-3xl font-bold mt-1">{habits.length > 0 ? Math.round((completedToday / habits.length) * 100) : 0}%</p>
+                        <p className="text-3xl font-bold mt-1">{activeHabitsForToday.length > 0 ? Math.round((completedToday / activeHabitsForToday.length) * 100) : 0}%</p>
                     </div>
                 </div>
+
+                {/* Gamification / Trophies Row */}
+                {myBadges.length > 0 && (
+                    <div className="mt-8 mb-4">
+                        <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <FaTrophy className="text-yellow-500" /> Your Trophies
+                        </h2>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            {myBadges.map((badge, idx) => (
+                                <BadgeCard key={idx} title={badge.title} desc={badge.desc} icon={badge.icon} />
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
+
+            {/* Performance Chart */}
+            <CompletionChart habits={habits} />
 
             {/* Create Form */}
             {showForm && (
@@ -234,6 +304,41 @@ const Dashboard = () => {
                             />
                         </div>
                         <div>
+                            <label className="block text-sm font-medium text-gray-600 mb-1">Frequency</label>
+                            <select
+                                value={newHabitFrequency}
+                                onChange={e => setNewHabitFrequency(e.target.value)}
+                                className="block w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 bg-white/80 transition-all"
+                            >
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="custom">Custom Days</option>
+                            </select>
+                        </div>
+                        {newHabitFrequency === 'custom' && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600 mb-1">Select Days</label>
+                                <div className="flex gap-2 flex-wrap">
+                                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, idx) => (
+                                        <button
+                                            key={idx}
+                                            type="button"
+                                            onClick={() => {
+                                                if (newHabitDays.includes(String(idx))) {
+                                                    setNewHabitDays(newHabitDays.filter(d => d !== String(idx)));
+                                                } else {
+                                                    setNewHabitDays([...newHabitDays, String(idx)]);
+                                                }
+                                            }}
+                                            className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${newHabitDays.includes(String(idx)) ? 'bg-purple-100 border-purple-300 text-purple-700' : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'}`}
+                                        >
+                                            {day}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        <div>
                             <label className="block text-sm font-medium text-gray-600 mb-1">Reminder Time (Optional)</label>
                             <input
                                 type="time"
@@ -254,16 +359,16 @@ const Dashboard = () => {
 
             {/* Habits List */}
             <div className="grid gap-4">
-                {habits.length === 0 ? (
+                {activeHabitsForToday.length === 0 ? (
                     <div className="text-center py-16 bg-white/60 rounded-2xl border-2 border-dashed border-purple-200">
                         <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                             <FaStar className="text-purple-400 text-2xl" />
                         </div>
-                        <p className="text-gray-500 font-medium">No habits yet</p>
+                        <p className="text-gray-500 font-medium">No habits scheduled for today</p>
                         <p className="text-gray-400 text-sm mt-1">Click "New Habit" to start your journey!</p>
                     </div>
                 ) : (
-                    habits.map(habit => (
+                    activeHabitsForToday.map(habit => (
                         <HabitCard
                             key={habit.id}
                             habit={habit}

@@ -44,7 +44,9 @@ const HabitCard = ({ habit, onToggle, onDelete }) => {
                         )}
                         <div className="flex items-center gap-3 mt-2">
                             <span className={clsx("text-xs font-semibold px-2.5 py-1 rounded-full", colors.badge)}>
-                                {habit.frequency}
+                                {habit.frequency === 'custom' && habit.recurrence_days
+                                    ? habit.recurrence_days.split(',').map(d => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][parseInt(d)]).join(', ')
+                                    : habit.frequency}
                             </span>
                             {habit.reminder_time && (
                                 <span className={clsx("text-xs font-semibold px-2.5 py-1 rounded-full border bg-white shadow-sm flex items-center gap-1", isCompletedToday ? "text-gray-400 border-gray-100" : "text-gray-600 border-gray-200")}>

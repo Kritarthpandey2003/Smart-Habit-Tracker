@@ -20,7 +20,8 @@ class Habit(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(200))
-    frequency = db.Column(db.String(20), default='daily')  # daily, weekly
+    frequency = db.Column(db.String(20), default='daily')  # daily, weekly, custom
+    recurrence_days = db.Column(db.String(50)) # e.g., "1,2,3,4,5"
     reminder_time = db.Column(db.String(5))
     logs = db.relationship('HabitLog', backref='habit', lazy=True, cascade="all, delete-orphan")
 
@@ -30,6 +31,7 @@ class Habit(db.Model):
             'name': self.name,
             'description': self.description,
             'frequency': self.frequency,
+            'recurrence_days': self.recurrence_days,
             'reminder_time': self.reminder_time
         }
 
